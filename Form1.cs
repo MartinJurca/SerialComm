@@ -18,6 +18,7 @@ namespace SerialComm
         SerialPort PORT = new SerialPort();
         bool auto_scroll = true;
         String buf = "";
+        bool af = true;
         public SerialComm()
         {
             InitializeComponent();
@@ -38,7 +39,7 @@ namespace SerialComm
             newlinePovolen.Checked = false;
             jeOtevren.Visible = false;
             jeZavren.Visible = true;
-            string[] seznam_rychlosti = { "300", "1200", "2400", "4800", "9600", "19200", "38400", "57600", "74880", "115200", "230400" };
+            string[] seznam_rychlosti = { "300", "1200", "2400", "4800", "9600", "19200", "38400", "57600", "74880", "115200", "230400", "921600" };
             foreach (string jedna_rychlost in seznam_rychlosti)
             {
                 try
@@ -160,26 +161,66 @@ namespace SerialComm
             catch (UnauthorizedAccessException)
             {
                 informacniRadek.Text = "přístup byl odepřen!";
+                groupBox1.Enabled = true;
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                porty.Enabled = true;
+                rychlosti.Enabled = true;
+                jeOtevren.Visible = false;
+                jeZavren.Visible = true;
                 return;
             }
             catch (ArgumentOutOfRangeException)
             {
                 informacniRadek.Text = "nastavené hodnoty jsou mimo rozsah!";
+                groupBox1.Enabled = true;
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                porty.Enabled = true;
+                rychlosti.Enabled = true;
+                jeOtevren.Visible = false;
+                jeZavren.Visible = true;
                 return;
             }
             catch (ArgumentException)
             {
                 informacniRadek.Text = "nastavené hodnoty jsou neplatné!";
+                groupBox1.Enabled = true;
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                porty.Enabled = true;
+                rychlosti.Enabled = true;
+                jeOtevren.Visible = false;
+                jeZavren.Visible = true;
                 return;
             }
             catch (System.IO.IOException)
             {
                 informacniRadek.Text = "nepodařilo se připojit!";
+                groupBox1.Enabled = true;
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                porty.Enabled = true;
+                rychlosti.Enabled = true;
+                jeOtevren.Visible = false;
+                jeZavren.Visible = true;
                 return;
             }
             catch (InvalidOperationException)
             {
                 informacniRadek.Text = "nepodařilo se připojit!";
+                groupBox1.Enabled = true;
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                porty.Enabled = true;
+                rychlosti.Enabled = true;
+                jeOtevren.Visible = false;
+                jeZavren.Visible = true;
                 return;
             }
             finally
@@ -225,6 +266,38 @@ namespace SerialComm
         {
             if (PORT.IsOpen)
             {
+                informacniRadek.Text = "odpojování...";
+                var CloseDown = new System.Threading.Thread(new System.Threading.ThreadStart(odpojit_port));
+                CloseDown.Start();
+                Thread.Sleep(100);
+                if (af)
+                {
+                    groupBox1.Enabled = true;
+                    groupBox2.Enabled = true;
+                    groupBox3.Enabled = true;
+                    groupBox4.Enabled = true;
+                    porty.Enabled = true;
+                    rychlosti.Enabled = true;
+                    informacniRadek.Text = "port byl úspěšně odpojen";
+                    jeOtevren.Visible = false;
+                    jeZavren.Visible = true;
+                }
+                else informacniRadek.Text = "port se nepodařilo odpojit!";
+            }
+            else
+            {
+                groupBox1.Enabled = true;
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                porty.Enabled = true;
+                rychlosti.Enabled = true;
+                jeOtevren.Visible = false;
+                jeZavren.Visible = true;
+                informacniRadek.Text = "port už je odpojen!";
+            }
+            /*if (PORT.IsOpen)
+            {
                 try
                 {
                     PORT.Close();
@@ -243,9 +316,40 @@ namespace SerialComm
                 informacniRadek.Text = "port byl úspěšně odpojen";
                 jeOtevren.Visible = false;
                 jeZavren.Visible = true;
-                PORT.DataReceived -= port_dataReceived;
+                //PORT.DataReceived -= port_dataReceived;
             }
-            else informacniRadek.Text = "port už je odpojený!";
+            else informacniRadek.Text = "port už je odpojený!";*/
+        }
+
+        public void odpojit_port()
+        {
+            if (PORT.IsOpen)
+            {
+                try
+                {
+                    PORT.DataReceived -= port_dataReceived;
+                    Thread.Sleep(50);
+                    PORT.Close();
+                }
+                catch (System.IO.IOException)
+                {
+                    af = false;
+                    //informacniRadek.Text = "nepodařilo se odpojit port!";
+                    return;
+                }
+                af = true;
+                /*groupBox1.Enabled = true;
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                porty.Enabled = true;
+                rychlosti.Enabled = true;
+                //informacniRadek.Text = "port byl úspěšně odpojen";
+                jeOtevren.Visible = false;
+                jeZavren.Visible = true;
+                //PORT.DataReceived -= port_dataReceived;*/
+            }
+            //else informacniRadek.Text = "port už je odpojený!";
         }
 
         private void odesilaciRadek_KeyPress(object sender, KeyPressEventArgs e)
@@ -281,8 +385,16 @@ namespace SerialComm
                 }
                 else
                 {
+                    groupBox1.Enabled = true;
+                    groupBox2.Enabled = true;
+                    groupBox3.Enabled = true;
+                    groupBox4.Enabled = true;
+                    porty.Enabled = true;
+                    rychlosti.Enabled = true;
+                    jeOtevren.Visible = false;
+                    jeZavren.Visible = true;
                     informacniRadek.Text = "port není otevřen!";
-                    odesilaciRadek.Text = "";
+                    //odesilaciRadek.Text = "";
                 }
             }
         }
@@ -317,14 +429,25 @@ namespace SerialComm
             }
             else
             {
+                groupBox1.Enabled = true;
+                groupBox2.Enabled = true;
+                groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                porty.Enabled = true;
+                rychlosti.Enabled = true;
+                jeOtevren.Visible = false;
+                jeZavren.Visible = true;
                 informacniRadek.Text = "port není otevřen!";
-                odesilaciRadek.Text = "";
+                //odesilaciRadek.Text = "";
             }
         }
 
         private void port_dataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (!PORT.IsOpen) return;
+            if (!PORT.IsOpen)
+            {
+                return;
+            }
             String data_in = "";
             try
             {
